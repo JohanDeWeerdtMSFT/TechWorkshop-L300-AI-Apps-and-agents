@@ -296,7 +296,7 @@ var cosmosDbBuiltInDataContributorRoleId = '00000000-0000-0000-0000-000000000002
 // var cosmosDbAccountReaderRoleId = 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8'
 var cognitiveServicesOpenAIUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 var cognitiveServicesContributorRoleId = '25fbc0a9-bd7c-42a3-aa1a-3b75d497ee68'
-var azureAIUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
+var foundryUserRoleId = '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 
 @description('Assigns Cosmos DB Built-in Data Contributor role to the specified user')
 resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments@2023-04-15' = {
@@ -310,25 +310,36 @@ resource cosmosDbDataContributorRoleAssignment 'Microsoft.DocumentDB/databaseAcc
 }
 
 // Role assignments for deploying user principal
-@description('Assigns Azure AI User role to the deploying user on AI Project')
-resource userProjectAIUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiProject.id, userPrincipalId, azureAIUserRoleId)
+@description('Assigns Foundry User role to the deploying user on AI Project')
+resource userProjectFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiProject.id, userPrincipalId, foundryUserRoleId)
   scope: aiProject
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAIUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: userPrincipalId
     principalType: 'User'
   }
 }
 
-@description('Assigns Azure AI User role to the deploying user on Microsoft Foundry')
-resource userFoundryAIUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiFoundry.id, userPrincipalId, azureAIUserRoleId)
+@description('Assigns Foundry User role to the deploying user on Microsoft Foundry')
+resource userFoundryFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, userPrincipalId, foundryUserRoleId)
   scope: aiFoundry
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAIUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: userPrincipalId
     principalType: 'User'
+  }
+}
+
+@description('Assigns Foundry User role to the AI Project managed identity on Microsoft Foundry')
+resource projectIdentityFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, aiProject.id, foundryUserRoleId)
+  scope: aiFoundry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
+    principalId: aiProject.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -366,23 +377,23 @@ resource cosmosDbProjectContributorRole 'Microsoft.Authorization/roleAssignments
   }
 }
 
-@description('Assigns Azure AI User role to Cosmos DB on AI Project')
-resource cosmosDbProjectAIUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiProject.id, cosmosDbAccount.id, azureAIUserRoleId)
+@description('Assigns Foundry User role to Cosmos DB on AI Project')
+resource cosmosDbProjectFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiProject.id, cosmosDbAccount.id, foundryUserRoleId)
   scope: aiProject
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAIUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: cosmosDbAccount.identity.principalId
     principalType: 'ServicePrincipal'
   }
 }
 
-@description('Assigns Azure AI User role to Cosmos DB on Microsoft Foundry')
-resource cosmosDbFoundryAIUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aiFoundry.id, cosmosDbAccount.id, azureAIUserRoleId)
+@description('Assigns Foundry User role to Cosmos DB on Microsoft Foundry')
+resource cosmosDbFoundryFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, cosmosDbAccount.id, foundryUserRoleId)
   scope: aiFoundry
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', azureAIUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: cosmosDbAccount.identity.principalId
     principalType: 'ServicePrincipal'
   }
@@ -417,6 +428,28 @@ resource containerAppFoundryOpenAIUserRole 'Microsoft.Authorization/roleAssignme
   scope: aiFoundry
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', cognitiveServicesOpenAIUserRoleId)
+    principalId: containerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+@description('Assigns Foundry User role to the Container App on AI Project')
+resource containerAppProjectFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiProject.id, containerApp.id, foundryUserRoleId)
+  scope: aiProject
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
+    principalId: containerApp.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+@description('Assigns Foundry User role to the Container App on Microsoft Foundry')
+resource containerAppFoundryFoundryUserRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(aiFoundry.id, containerApp.id, foundryUserRoleId)
+  scope: aiFoundry
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
     principalId: containerApp.identity.principalId
     principalType: 'ServicePrincipal'
   }
