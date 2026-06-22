@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from openai import AzureOpenAI
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -21,13 +22,14 @@ application_insights_connection_string = os.environ["APPLICATIONINSIGHTS_CONNECT
 #Azure OpenAI
 endpoint = os.getenv("gpt_endpoint")
 deployment = os.getenv("gpt_deployment")
-api_key = os.getenv("gpt_api_key")
 api_version = os.getenv("gpt_api_version")
+credential = DefaultAzureCredential()
+token_provider = get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default")
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(current_dir))  # Go up 2 levels from src/tools/ to root
 PROMPT_PATH = os.path.join(project_root, 'prompts', 'DiscountLogicPrompt.txt')
-with open(PROMPT_PATH, 'r') as file:
+with open(PROMPT_PATH, 'r', encoding='utf-8') as file:
     PROMPT = file.read()
 
 @trace_function()
@@ -47,7 +49,7 @@ def calculate_discount(CustomerID):
     # @trace_function()
     def get_transaction_data(CustomerID):
         start_time = time.time()
-        time.sleep(2)  # Simulating a delay for demonstration purposes
+        time.sleep(0.5)  # Simulating a delay for demonstration purposes
         """
         Simulates connecting to Azure SQL database. Returns the total price for a given customer ID from the transaction data.
         
@@ -85,7 +87,7 @@ def calculate_discount(CustomerID):
             DataFrame containing the query results.
         """
         # This simulates connecting to a Fabric lakehouse to retrieve customer data.
-        time.sleep(2)  
+        time.sleep(0.5)
         # Adding attributes to the current span
         span = trace.get_current_span()
         span.set_attribute("data_fetch_id", CustomerID)
@@ -132,7 +134,7 @@ def calculate_discount(CustomerID):
         # Initialize client
         client = AzureOpenAI(
             azure_endpoint=endpoint,
-            api_key=api_key,
+            azure_ad_token_provider=token_provider,
             api_version=api_version,
         )
         # print(f"loyalty_info is:{loyalty_info}, invoice value: {InvoiceValue} and transaction_info is:{transaction_info}")
