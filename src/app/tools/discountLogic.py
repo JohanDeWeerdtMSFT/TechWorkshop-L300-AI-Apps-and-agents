@@ -6,15 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from opentelemetry import trace
-from azure.monitor.opentelemetry import configure_azure_monitor
-from azure.ai.agents.telemetry import trace_function
 import time
-# from opentelemetry.instrumentation.openai_v2 import OpenAIInstrumentor
-
-# Enable Azure Monitor tracing
-application_insights_connection_string = os.environ["APPLICATIONINSIGHTS_CONNECTION_STRING"]
-# configure_azure_monitor(connection_string=application_insights_connection_string)
-# OpenAIInstrumentor().instrument()
 
 # scenario = os.path.basename(__file__)
 # tracer = trace.get_tracer(__name__)
@@ -32,7 +24,6 @@ PROMPT_PATH = os.path.join(project_root, 'prompts', 'DiscountLogicPrompt.txt')
 with open(PROMPT_PATH, 'r', encoding='utf-8') as file:
     PROMPT = file.read()
 
-@trace_function()
 def calculate_discount(CustomerID):
     print(f"calculate_discount function:{CustomerID}")
     """
